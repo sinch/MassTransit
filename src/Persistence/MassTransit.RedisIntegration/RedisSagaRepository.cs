@@ -10,10 +10,10 @@
         where TSaga : class, ISagaVersion
     {
         public static ISagaRepository<TSaga> Create(Func<IDatabase> redisDbFactory, bool optimistic = true, TimeSpan? lockTimeout = null, TimeSpan?
-            lockRetryTimeout = null, string keyPrefix = "", TimeSpan? expiry = null)
+            lockRetryTimeout = null, string keyPrefix = "", TimeSpan? expiry = null, ISagaInstanceSerializer sagaInstanceSerializer = null)
         {
             var options = new RedisSagaRepositoryOptions<TSaga>(optimistic ? ConcurrencyMode.Optimistic : ConcurrencyMode.Pessimistic, lockTimeout, null,
-                keyPrefix, SelectDefaultDatabase, expiry);
+                keyPrefix, SelectDefaultDatabase, expiry, sagaInstanceSerializer);
 
             var consumeContextFactory = new SagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga>();
 

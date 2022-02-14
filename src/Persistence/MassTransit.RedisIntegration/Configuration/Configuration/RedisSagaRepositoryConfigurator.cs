@@ -17,6 +17,7 @@ namespace MassTransit.RedisIntegration.Configuration
         ConfigurationOptions _configurationOptions;
         Func<IConfigurationServiceProvider, ConnectionMultiplexer> _connectionFactory;
         SelectDatabase _databaseSelector;
+        Func<ISagaInstanceSerializer> _sagaInstanceSerializerFactory;
 
         public RedisSagaRepositoryConfigurator()
         {
@@ -26,6 +27,7 @@ namespace MassTransit.RedisIntegration.Configuration
 
             DatabaseConfiguration("127.0.0.1");
             _databaseSelector = SelectDefaultDatabase;
+            _sagaInstanceSerializerFactory = () => new JsonInstanceSerializer();
         }
 
         public ConcurrencyMode ConcurrencyMode { get; set; }
@@ -34,6 +36,7 @@ namespace MassTransit.RedisIntegration.Configuration
         public TimeSpan LockTimeout { get; set; }
         public TimeSpan LockRetryTimeout { get; set; }
         public TimeSpan? Expiry { get; set; }
+        public ISagaInstanceSerializer SagaInstanceSerializer { get; set; }
 
         public void DatabaseConfiguration(string configuration)
         {
@@ -62,6 +65,11 @@ namespace MassTransit.RedisIntegration.Configuration
             _databaseSelector = databaseSelector;
         }
 
+        public void SetSagaInstanceSerializer(ISagaInstanceSerializer serializer)
+        {
+            _sagaInstanceSerializerFactory = () => serializer;
+        }
+
         public IEnumerable<ValidationResult> Validate()
         {
             if (_connectionFactory == null)
@@ -77,7 +85,7 @@ namespace MassTransit.RedisIntegration.Configuration
         {
             configurator.RegisterSingleInstance(_connectionFactory);
             configurator.RegisterSingleInstance(new RedisSagaRepositoryOptions<T>(ConcurrencyMode, LockTimeout, LockSuffix, KeyPrefix, _databaseSelector,
-                Expiry));
+                Expiry, _sagaInstanceSerializerFactory()));
             configurator.RegisterSagaRepository<T, DatabaseContext<T>, SagaConsumeContextFactory<DatabaseContext<T>, T>,
                 RedisSagaRepositoryContextFactory<T>>();
         }

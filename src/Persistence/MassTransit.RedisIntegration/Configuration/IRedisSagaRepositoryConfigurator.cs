@@ -49,6 +49,12 @@ namespace MassTransit.RedisIntegration
         /// </summary>
         /// <param name="databaseSelector"></param>
         void SelectDatabase(SelectDatabase databaseSelector);
+
+        /// <summary>
+        /// Set custom serializer for data that is stored to and retrieved from redis
+        /// </summary>
+        /// <param name="serializer"></param>
+        void SetSagaInstanceSerializer(ISagaInstanceSerializer serializer);
     }
 
 

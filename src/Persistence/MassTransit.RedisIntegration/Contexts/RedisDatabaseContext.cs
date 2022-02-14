@@ -108,12 +108,12 @@ namespace MassTransit.RedisIntegration.Contexts
         {
             var value = await _database.StringGetAsync(_options.FormatSagaKey(correlationId)).ConfigureAwait(false);
 
-            return value.IsNullOrEmpty ? null : SagaSerializer.Deserialize<TSaga>(value);
+            return value.IsNullOrEmpty ? null : _options.InstanceSerializer.Deserialize<TSaga>(value);
         }
 
         Task Put(TSaga instance)
         {
-            return _database.StringSetAsync(_options.FormatSagaKey(instance.CorrelationId), SagaSerializer.Serialize(instance), _options.Expiry);
+            return _database.StringSetAsync(_options.FormatSagaKey(instance.CorrelationId), _options.InstanceSerializer.Serialize(instance), _options.Expiry);
         }
 
         Task Delete(Guid correlationId)

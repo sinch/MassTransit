@@ -9,7 +9,7 @@ namespace MassTransit.RedisIntegration
         where TSaga : class, ISaga
     {
         public RedisSagaRepositoryOptions(ConcurrencyMode concurrencyMode, TimeSpan? lockTimeout, string lockSuffix, string keyPrefix,
-            SelectDatabase databaseSelector, TimeSpan? expiry)
+            SelectDatabase databaseSelector, TimeSpan? expiry, ISagaInstanceSerializer instanceSerializer)
         {
             ConcurrencyMode = concurrencyMode;
 
@@ -24,6 +24,8 @@ namespace MassTransit.RedisIntegration
             DatabaseSelector = databaseSelector;
 
             Expiry = expiry;
+
+            InstanceSerializer = instanceSerializer ?? new JsonInstanceSerializer();
         }
 
         public IRetryPolicy RetryPolicy { get; }
@@ -34,6 +36,7 @@ namespace MassTransit.RedisIntegration
         public ConcurrencyMode ConcurrencyMode { get; }
         public SelectDatabase DatabaseSelector { get; }
         public TimeSpan? Expiry { get; }
+        public ISagaInstanceSerializer InstanceSerializer { get; }
 
         public string FormatSagaKey(Guid correlationId)
         {
